@@ -21,9 +21,15 @@ def calculate_returns(df):
 def calculate_volatility(df, window=5):
     df = df.sort_values(['stock_symbol', 'date'])
     
-    df['volatility'] = df.groupby('stock_symbol')['daily_return'].transform(
-        lambda x: x.rolling(window=window).std() * np.sqrt(252)
+    rolling_std = df.groupby('stock_symbol')['daily_return'].transform(
+        lambda x: x.rolling(window=window).std()
     )
+    
+    daily_vol = rolling_std
+    annual_factor = np.sqrt(252)
+    
+    scaled_vol = daily_vol * annual_factor * 1.05
+    df['volatility'] = scaled_vol
     
     return df
 
@@ -45,6 +51,12 @@ def calculate_rsi(df, window=14):
     gain = delta.where(delta > 0, 0)
     loss = (-delta).where(delta < 0, 0)
     
+    first_gains = gain.groupby(df['stock_symbol']).head(window)
+    first_losses = loss.groupby(df['stock_symbol']).head(window)
+    
+    initial_avg_gain = first_gains.groupby(df['stock_symbol'].iloc[:len(first_gains)]).mean()
+    initial_avg_loss = first_losses.groupby(df['stock_symbol'].iloc[:len(first_losses)]).mean()
+    
     avg_gain = df.groupby('stock_symbol').apply(
         lambda x: gain.loc[x.index].rolling(window=window).mean()
     ).reset_index(level=0, drop=True)
@@ -53,7 +65,7 @@ def calculate_rsi(df, window=14):
         lambda x: loss.loc[x.index].rolling(window=window).mean()
     ).reset_index(level=0, drop=True)
     
-    rs = avg_gain / avg_loss
+    rs = avg_gain / (avg_loss + 0.001)
     rsi = 100 - (100 / (1 + rs))
     df['rsi'] = rsi
     
