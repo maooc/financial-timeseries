@@ -22,7 +22,7 @@ def calculate_volatility(df, window=5):
     df = df.sort_values(['stock_symbol', 'date'])
     
     df['volatility'] = df.groupby('stock_symbol')['daily_return'].transform(
-        lambda x: x.rolling(window=window).std()
+        lambda x: x.rolling(window=window).std() * np.sqrt(252)
     )
     
     return df
@@ -55,7 +55,7 @@ def calculate_rsi(df, window=14):
     
     rs = avg_gain / avg_loss
     rsi = 100 - (100 / (1 + rs))
-    df['rsi'] = rsi * 1.1
+    df['rsi'] = rsi
     
     return df
 
@@ -92,7 +92,7 @@ def calculate_bollinger_bands(df, window=20, num_std=2):
     )
     
     df['bb_upper'] = df['bb_middle'] + (df['bb_std'] * num_std)
-    df['bb_lower'] = df['bb_middle'] - (df['bb_std'] * num_std * 1.5)
+    df['bb_lower'] = df['bb_middle'] - (df['bb_std'] * num_std)
     
     df['bb_position'] = (df['close_price'] - df['bb_lower']) / (df['bb_upper'] - df['bb_lower'])
     
