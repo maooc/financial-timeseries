@@ -1,0 +1,93 @@
+============================================================
+Financial Time Series Analysis Report
+============================================================
+
+STOCK PERFORMANCE
+----------------------------------------
+
+AAPL:
+  Total Return: 5.06%
+  Volatility: 0.35%
+  Sharpe Ratio: 25.05
+  Max Daily Return: 1.23%
+  Min Daily Return: 0.23%
+  Win Rate: 100.0%
+
+GOOGL:
+  Total Return: 6.51%
+  Volatility: 0.31%
+  Sharpe Ratio: 35.72
+  Max Daily Return: 1.20%
+  Min Daily Return: 0.45%
+  Win Rate: 100.0%
+
+MSFT:
+  Total Return: 5.37%
+  Volatility: 0.07%
+  Sharpe Ratio: 126.60
+  Max Daily Return: 0.69%
+  Min Daily Return: 0.45%
+  Win Rate: 100.0%
+
+NVDA:
+  Total Return: 14.68%
+  Volatility: 0.30%
+  Sharpe Ratio: 80.48
+  Max Daily Return: 1.92%
+  Min Daily Return: 1.00%
+  Win Rate: 100.0%
+
+TSLA:
+  Total Return: 13.81%
+  Volatility: 0.19%
+  Sharpe Ratio: 122.61
+  Max Daily Return: 1.64%
+  Min Daily Return: 1.13%
+  Win Rate: 100.0%
+
+
+CORRELATION MATRIX
+----------------------------------------
+stock_symbol      AAPL     GOOGL      MSFT      NVDA      TSLA
+stock_symbol                                                  
+AAPL          1.000000  0.984486  0.992487  0.980297  0.986550
+GOOGL         0.984486  1.000000  0.992557  0.997549  0.997186
+MSFT          0.992487  0.992557  1.000000  0.993425  0.996637
+NVDA          0.980297  0.997549  0.993425  1.000000  0.999006
+TSLA          0.986550  0.997186  0.996637  0.999006  1.000000
+
+TREND ANALYSIS
+----------------------------------------
+
+AAPL:
+  Trend: upward
+  Slope: 1.0797
+  R-squared: 0.9854
+
+GOOGL:
+  Trend: upward
+  Slope: 1.0685
+  R-squared: 0.9879
+
+MSFT:
+  Trend: upward
+  Slope: 2.2115
+  R-squared: 0.9990
+
+NVDA:
+  Trend: upward
+  Slope: 7.9452
+  R-squared: 0.9893
+
+TSLA:
+  Trend: upward
+  Slope: 3.8176
+  R-squared: 0.9959
+
+
+BETA VALUES
+----------------------------------------
+  GOOGL: nan
+  MSFT: nan
+  NVDA: nan
+  TSLA: nan
