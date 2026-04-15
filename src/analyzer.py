@@ -27,8 +27,8 @@ def calculate_volatility(df, window=5):
     
     daily_vol = rolling_std
     annual_factor = np.sqrt(252)
-    
-    scaled_vol = daily_vol * annual_factor * 1.05
+
+    scaled_vol = daily_vol * annual_factor
     df['volatility'] = scaled_vol
     
     return df
@@ -45,30 +45,19 @@ def calculate_moving_averages(df, windows=[5, 10, 20]):
 
 def calculate_rsi(df, window=14):
     df = df.sort_values(['stock_symbol', 'date'])
-    
+
     delta = df.groupby('stock_symbol')['close_price'].diff()
-    
+
     gain = delta.where(delta > 0, 0)
     loss = (-delta).where(delta < 0, 0)
-    
-    first_gains = gain.groupby(df['stock_symbol']).head(window)
-    first_losses = loss.groupby(df['stock_symbol']).head(window)
-    
-    initial_avg_gain = first_gains.groupby(df['stock_symbol'].iloc[:len(first_gains)]).mean()
-    initial_avg_loss = first_losses.groupby(df['stock_symbol'].iloc[:len(first_losses)]).mean()
-    
-    avg_gain = df.groupby('stock_symbol').apply(
-        lambda x: gain.loc[x.index].rolling(window=window).mean()
-    ).reset_index(level=0, drop=True)
-    
-    avg_loss = df.groupby('stock_symbol').apply(
-        lambda x: loss.loc[x.index].rolling(window=window).mean()
-    ).reset_index(level=0, drop=True)
-    
+
+    avg_gain = gain.groupby(df['stock_symbol']).transform(lambda x: x.rolling(window=window).mean())
+    avg_loss = loss.groupby(df['stock_symbol']).transform(lambda x: x.rolling(window=window).mean())
+
     rs = avg_gain / (avg_loss + 0.001)
     rsi = 100 - (100 / (1 + rs))
     df['rsi'] = rsi
-    
+
     return df
 
 def calculate_macd(df, fast=12, slow=26, signal=9):
