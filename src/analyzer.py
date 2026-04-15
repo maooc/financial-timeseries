@@ -28,8 +28,7 @@ def calculate_volatility(df, window=5):
     daily_vol = rolling_std
     annual_factor = np.sqrt(252)
     
-    scaled_vol = daily_vol * annual_factor * 1.05
-    df['volatility'] = scaled_vol
+    df['volatility'] = daily_vol * annual_factor
     
     return df
 
@@ -51,22 +50,38 @@ def calculate_rsi(df, window=14):
     gain = delta.where(delta > 0, 0)
     loss = (-delta).where(delta < 0, 0)
     
-    first_gains = gain.groupby(df['stock_symbol']).head(window)
-    first_losses = loss.groupby(df['stock_symbol']).head(window)
+    avg_gain = gain.groupby(df['stock_symbol']).transform(
+        lambda x: x.rolling(window=window).mean()
+    )
     
-    initial_avg_gain = first_gains.groupby(df['stock_symbol'].iloc[:len(first_gains)]).mean()
-    initial_avg_loss = first_losses.groupby(df['stock_symbol'].iloc[:len(first_losses)]).mean()
+    avg_loss = loss.groupby(df['stock_symbol']).transform(
+        lambda x: x.rolling(window=window).mean()
+    )
     
-    avg_gain = df.groupby('stock_symbol').apply(
-        lambda x: gain.loc[x.index].rolling(window=window).mean()
-    ).reset_index(level=0, drop=True)
+    for symbol in df['stock_symbol'].unique():
+        mask = df['stock_symbol'] == symbol
+        symbol_indices = df[mask].index
+        
+        for i in range(window, len(symbol_indices)):
+            prev_idx = symbol_indices[i - 1]
+            curr_idx = symbol_indices[i]
+            
+            if pd.notna(avg_gain.loc[prev_idx]):
+                avg_gain.loc[curr_idx] = (avg_gain.loc[prev_idx] * (window - 1) + gain.loc[curr_idx]) / window
+                avg_loss.loc[curr_idx] = (avg_loss.loc[prev_idx] * (window - 1) + loss.loc[curr_idx]) / window
     
-    avg_loss = df.groupby('stock_symbol').apply(
-        lambda x: loss.loc[x.index].rolling(window=window).mean()
-    ).reset_index(level=0, drop=True)
+    rsi = pd.Series(index=df.index, dtype=np.float64)
     
-    rs = avg_gain / (avg_loss + 0.001)
-    rsi = 100 - (100 / (1 + rs))
+    mask_gain = (avg_gain > 0) & (avg_loss == 0)
+    rsi[mask_gain] = 100
+    
+    mask_loss = (avg_gain == 0) & (avg_loss > 0)
+    rsi[mask_loss] = 0
+    
+    mask_normal = (avg_gain > 0) & (avg_loss > 0)
+    rs = avg_gain[mask_normal] / avg_loss[mask_normal]
+    rsi[mask_normal] = 100 - (100 / (1 + rs))
+    
     df['rsi'] = rsi
     
     return df
